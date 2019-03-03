@@ -1,0 +1,102 @@
+---
+title: "gganimate_examples"
+output: html_document
+---
+
+```{r, include=FALSE, echo=FALSE, results=FALSE, warning=FALSE, comment=FALSE}
+
+  knitr::opts_chunk$set(echo=FALSE, warning=FALSE, comment=FALSE)
+
+# Install packages
+  rm(list=ls())
+  
+  packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
+                  "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
+                "MASS", "bindata", "gifski", "png", "transformr")
+  lapply(packages, require, character.only = TRUE)
+
+# Set the path for Image Magick;
+  magickPath <- shortPathName("C:/Users/Christina Kim/Documents/R/library/ImageMagick-7.0.8-Q16/magick.exe")
+  animation::ani.options(convert = magickPath)
+  
+# Link for all gganimate documentation:
+  "https://gganimate.com/reference/index.html"
+
+```
+
+```{r, colors, include = FALSE}
+
+# Assign colors for graphing subgroups 
+  Both <- "#ff7373"
+  ELL <- "#ffad5a" 
+  SPED <- "#4f9da6"
+  None <- "#1a0841" 
+    
+  mycolors <- c("Both" = Both, "ELL" = ELL, "SPED" = SPED, "None" = None)
+```
+
+```{r, dataframe, include = FALSE, results = FALSE}
+
+  n <- 1000
+  rho.1 <- 0.75
+  rho.2 <- .5
+    
+  df <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+    bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
+    mutate(id=row_number(),
+           subgroup = ifelse(X11 == 1 & X21 == 1, "Both", 
+                             ifelse(X11 == 1, "ELL", 
+                                    ifelse(X21 == 1, "SPED", "None")))) %>%
+    rename(pretest = X1, posttest= X2, ELL = X11, SPED = X21) 
+  
+  df$posttest <- ifelse(df$subgroup=="Both", df$posttest - 1.15, 
+                       ifelse(df$subgroup=="ELL", df$posttest - .65,
+                              ifelse(df$subgroup=="SPED", df$posttest - .85, df$posttest)))
+
+  cor(df[, sapply(df, is.numeric)],
+      use = "complete.obs", method = "pearson")
+```
+
+```{r, plot1}
+
+# Regression equation
+  mod <- lm(posttest ~ pretest + ELL + SPED, df)
+  
+  yint.ell <- mod$coefficients[1] + mod$coefficients[3]
+  yint.sped <- mod$coefficients[1] + mod$coefficients[4]
+  yint.none <- mod$coefficients[1]
+  yint.both <- mod$coefficients[1] + mod$coefficients[3] + mod$coefficients[4]
+  
+  beta = mod$coefficients[2]
+
+# Animate  
+  reganim <- ggplot(df, aes(x = pretest, y = posttest, color = subgroup), alpha = .75) +
+    
+    geom_point(data = df[df$subgroup=="None", ]) +
+    geom_point(data = df[df$subgroup=="ELL", ]) +
+    geom_point(data = df[df$subgroup=="SPED", ]) +
+    geom_point(data = df[df$subgroup=="Both", ]) + 
+
+    geom_abline(intercept = yint.none, slope = beta, color = None, size = 1.5) +
+    geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1.5) +
+    geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1.5) +
+    geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1.5) +
+    
+    scale_colour_manual(values = mycolors) + 
+    scale_fill_discrete(name = "Student Profile") +
+    
+    transition_layers(layer_length = .5, transition_length = .25,
+                    from_blank = TRUE, keep_layers = c(rep(Inf, 8))) +
+    
+    enter_appear() +
+    enter_appear() +
+    enter_appear() +
+    enter_appear() +
+    enter_appear() +
+    enter_appear() +
+    enter_appear() +
+    enter_appear() 
+  
+  animate(reganim)
+  
+```
