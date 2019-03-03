@@ -1,5 +1,5 @@
 ---
-title: "gganimate_examples"
+title: "SLO Animated"
 output: html_document
 ---
 
@@ -21,18 +21,32 @@ output: html_document
   
 # Link for all gganimate documentation:
   "https://gganimate.com/reference/index.html"
+  
+# Next steps: Create style sheet
+  "https://stackoverflow.com/questions/30446905/rmarkdown-font-size-and-header/30447045"
 
 ```
 
-```{r, colors, include = FALSE}
+```{r, theme, include = FALSE}
 
 # Assign colors for graphing subgroups 
   Both <- "#ff7373"
   ELL <- "#ffad5a" 
   SPED <- "#4f9da6"
-  None <- "#1a0841" 
+  None <- "#280c64" 
     
-  mycolors <- c("Both" = Both, "ELL" = ELL, "SPED" = SPED, "None" = None)
+  mycolors <- c( "None" = None, "ELL" = ELL, "SPED" = SPED, "Both" = Both)
+
+# Create default theme    
+  mytheme <-
+    theme(
+      panel.background = element_rect(fill = "white"), 
+      axis.line = element_line(),
+      legend.key=element_blank()
+    )
+    
+  # Guide to theme references:
+   "https://ggplot2.tidyverse.org/reference/theme.html"
 ```
 
 ```{r, dataframe, include = FALSE, results = FALSE}
@@ -44,9 +58,10 @@ output: html_document
   df <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
     bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
     mutate(id=row_number(),
-           subgroup = ifelse(X11 == 1 & X21 == 1, "Both", 
+           subgroup = factor(ifelse(X11 == 1 & X21 == 1, "Both", 
                              ifelse(X11 == 1, "ELL", 
-                                    ifelse(X21 == 1, "SPED", "None")))) %>%
+                                    ifelse(X21 == 1, "SPED", "None"))),
+                             levels = c("None", "ELL", "SPED", "Both"))) %>%
     rename(pretest = X1, posttest= X2, ELL = X11, SPED = X21) 
   
   df$posttest <- ifelse(df$subgroup=="Both", df$posttest - 1.15, 
@@ -77,14 +92,19 @@ output: html_document
     geom_point(data = df[df$subgroup=="SPED", ]) +
     geom_point(data = df[df$subgroup=="Both", ]) + 
 
-    geom_abline(intercept = yint.none, slope = beta, color = None, size = 1.5) +
-    geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1.5) +
-    geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1.5) +
-    geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1.5) +
+    geom_abline(intercept = yint.none, slope = beta, color = None, size = 1.25) +
+    geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1.25) +
+    geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1.25) +
+    geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1.25) +
     
-    scale_colour_manual(values = mycolors) + 
-    scale_fill_discrete(name = "Student Profile") +
+    scale_colour_manual(breaks = c("None", "ELL", "SPED", "Both"), values = mycolors) + 
+
+    labs(x = "Prior Achievement Score",
+         y = "End of Year Score",
+         color = "Student Profile") + 
     
+    mytheme +
+
     transition_layers(layer_length = .5, transition_length = .25,
                     from_blank = TRUE, keep_layers = c(rep(Inf, 8))) +
     
