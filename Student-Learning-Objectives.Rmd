@@ -12,7 +12,8 @@ output: html_document
   
   packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
                   "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
-                "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick")
+                "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
+                "gridExtra")
   lapply(packages, require, character.only = TRUE)
 
 # Set the path for Image Magick
@@ -28,7 +29,6 @@ output: html_document
   "https://stackoverflow.com/questions/30446905/rmarkdown-font-size-and-header/30447045"
 
 ```
-
 ```{r, theme, include = FALSE}
 
 # Assign colors for graphing subgroups 
@@ -50,7 +50,6 @@ output: html_document
 # Guide to theme references:
  "https://ggplot2.tidyverse.org/reference/theme.html"
 ```
-
 ```{r, dataframe, include = FALSE, results = FALSE}
 
   n <- 1000
@@ -73,7 +72,6 @@ output: html_document
   cor(train[, sapply(train, is.numeric)],
       use = "complete.obs", method = "pearson")
 ```
-
 ```{r, model-train-test, include = FALSE, results = FALSE}
 # Train model
   mod <- lm(posttest ~ pretest + ELL + SPED, train)
@@ -96,6 +94,32 @@ output: html_document
   test$yhat <- round(predict(mod, newdata = test), digits = 2)
 ```
 
+# Introduction
+In general terms, a student learning objective, or SLO, is an academic goal set for a student at the start of a school
+year. Goals can be generic for a group of students or student-specific, and can be generated with or without prior
+achievement information. Whether or not a student met the goal is determined by the student's end-of-year
+performance. In the context of educator evaluation, SLOs follow the aforementioned steps, and then student-level
+results are aggregated, in a variety of possible ways, to produce a teacher-level result.
+
+# Methodology
+NYCDOE's goal-setting process for the 2017-18 school year (henceforth referred to as simply "goal-setting")
+compares a student's end-of-year performance on a relevant assessment to a goal derived from their predicted
+performance. Based on this comparison, a credit value between 0.00 and 1.25 is assigned. Listed below are the five
+overarching steps involved:
+
+1. **Goal**: Generate a student goal using a regression-based approach that includes incoming achievement data (e.g., prior year State ELA and Math assessment scores, fall NYC Performance Task baseline scores, etc.) and student demographic data (e.g., special education status, socioeconomic status, etc.).
+
+2. **Credit Band**: Generate a "credit band" around the student goal based on the spread of end-of-year scores around goals.
+
+3. **Credit Assignment**: Locate the student's end-of-year performance along the student's credit band and assign credit between 0.00 and 1.25, depending on the position of the end-of-year performance within the credit band.
+
+4. **Aggregation**: Calculate an average teacher-level metric called "average credit" based on the teacher's students' credit results.
+5. **Rating Conversion**: Convert average credit to one of four HEDI ratings: "Highly Effective," "Effective," "Developing," or "Ineffective" using state-provided conversion chart.
+
+### Goal
+Goal-setting begins in the Fall of each school year when NYCDOE projects student-level goals. Goals are projected using previous year data. Data from the previous year is used to estimate the relationship between posttest scores and various other model variables (e.g., pretest scores, ELL status). In other words, previous year data is used to estimate coefficients for the prediction model, which is an ordinary least squares (OLS) regression. Coefficients are then scored using current year student data, thus generating goals for the current cohort of students. Students with whom coefficients are estimated are called the estimation sample. Students for whom goals are predicted are called the "prediction sample". Coefficients are estimated separately by assessment, and assessments are only modelled if there are at least 200 students in the estimation sample. 
+
+The plot below demonstrates how students from the estimation sample are used to estimate the relationship (slope and intercept) between prior achievement, subgroup and end of year score. The relationship is defined in such a way that the slope (i.e. relationship between prior achivement and end of year score) is static but the intercept floats based upon subgroup. 
 ```{r, plot-train-model, fig.width = 6, fig.height = 5}
 # Animate  
   reganim <- ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
@@ -121,84 +145,76 @@ output: html_document
     mytheme +
 
     transition_layers(layer_length = .5, transition_length = .25,
-                    from_blank = TRUE, keep_layers = c(rep(Inf, 8))) +
-    
-   # Layers 1 - 4
-    enter_appear() +
-    enter_appear() +
-    enter_appear() +
-    enter_appear() +
-    
-   # Layers 4 - 8
-    enter_appear() +
-    enter_appear() +
-    enter_appear() +
-    enter_appear() 
-  
-  animate(reganim)
+                    from_blank = TRUE, keep_layers = c(rep(Inf, 8))) 
+
+animate(reganim)
 ```
 
+The model above is then used to generate goals for students in the prediction sample. To generate a given student's goal, we the student's prior achievement score and trace it along the line of best fit.
 ```{r, plot-test-model, fig.width = 6, fig.height = 5}
 # Fitted values for None and Both
   yhat_none <- test$yhat[test$subgroup == "None"]
   yhat_both <- test$yhat[test$subgroup == "Both"]
   
 # Grob for pretest annotation
-  txt_pretest <- textGrob(paste("Pretest=", pre), gp = gpar(fontsize = 11, fontface = "bold"))
+  txt_pretest <- textGrob(paste("Pretest=", pre), gp = gpar(fontsize = 9, fontface = "bold"))
   
 # Grobs for goal annotations  
-  txt_yhat_none <- textGrob(paste("Goal=", yhat_none), gp = gpar(fontsize = 11, fontface = "bold"))
-  txt_yhat_both <- textGrob(paste("Goal=", yhat_both), gp = gpar(fontsize = 11, fontface = "bold"))  
+  txt_yhat_none <- textGrob(paste("Goal=", yhat_none), gp = gpar(fontsize = 9, fontface = "bold"))
+  txt_yhat_both <- textGrob(paste("Goal=", yhat_both), gp = gpar(fontsize = 9, fontface = "bold"))  
   
 # Animate
- ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
+ predanim <- 
+ ggplot(train, aes(x = pretest, y = posttest)) +
    
-   geom_point(alpha = .75) + 
+   geom_point(alpha = .5, aes(color = subgroup)) + 
    
    # Best fit lines
-    geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
-    geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1) +
-    geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1) +
-    geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1) +
+    geom_abline(intercept = yint.none, slope = beta, size = 1, alpha = .75, color = None) +
+    geom_abline(intercept = yint.ell, slope = beta, size = 1, alpha = .75, color = ELL) +
+    geom_abline(intercept = yint.sped, slope = beta, size = 1, alpha = .75, color = SPED) +
+    geom_abline(intercept = yint.both, slope = beta, size = 1, alpha = .75, color = Both) +
    
    # Pretest setup
-     annotation_custom(txt_pretest, xmin = pre, xmax = pre, ymin = -Inf, ymax = -Inf) +
+     annotation_custom(txt_pretest, xmin = pre, xmax = pre, ymin = min(train$posttest), ymax = min(train$posttest)) +
      geom_point(data = test[test$subgroup == "None", ], aes(x = pretest, y = -Inf), color="black") +
      geom_segment(aes(x = pre, xend = pre, y = -Inf, yend = yhat_none), color = "black", linetype = 2, size=.75) + 
 
    # Subgroup None
      geom_segment(aes(x = pre, xend = -Inf, y = yhat_none, yend = yhat_none), color = "black", linetype = 2, size = .75, arrow=arrow(length=unit(0.4,"cm"))) +
      geom_point(data = test[test$subgroup == "None", ], aes(x = -Inf, y = yhat_none), color="black") +
-     annotation_custom(txt_yhat_none, xmin = -Inf, xmax = -Inf, ymin = yhat_none, ymax = yhat_none) + 
+     annotation_custom(txt_yhat_none, xmin = min(train$pretest) + .5, xmax = min(train$pretest) + .5, ymin = yhat_none + .5, ymax = yhat_none + .5 ) + 
 
    # Subgroup Both
      geom_segment(aes(x = pre, xend = -Inf, y = yhat_both, yend = yhat_both), color = "black", linetype = 2, size = .75, arrow=arrow(length=unit(0.4,"cm"))) +
      geom_point(data = test[test$subgroup == "None", ], aes(x = -Inf, y = yhat_both), color="black") +
-     annotation_custom(txt_yhat_both, xmin = -Inf, xmax = -Inf, ymin = yhat_both, ymax = yhat_both) +    
+     annotation_custom(txt_yhat_both, xmin = min(train$pretest) + .5, xmax = min(train$pretest) + .5, ymin = yhat_both + .5, ymax = yhat_both + .5) +    
    
    # Transitions
-     transition_layers(layer_length = .25, 
+     transition_layers(layer_length = .5, 
                       transition_length = .25,
                       from_blank = TRUE, 
-                      keep_layers = c(4, rep(c(Inf, 15)))
-                      ) +
+                      keep_layers = c(4, Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf,Inf
+                      )) +
    
    # Format
-     coord_cartesian(clip = "off") +
+     scale_colour_manual(breaks = c("None", "ELL", "SPED", "Both"), values = mycolors) + 
        
      labs(x = "Prior Achievement Score",
      y = "End of Year Score",
      color = "Student Profile") + 
        
      mytheme
+ 
+animate(predanim)
 ```
 
-Simulate change in pretest & subgroup vs. goal:
+<!-- Simulate change in pretest & subgroup vs. goal: -->
 ```{r}
 # https://github.com/thomasp85/gganimate/wiki/Animation-Composition
 ```
 
-Try it yourself!:
+<!-- Try it yourself!: -->
 ```{r}
 # Add shiny tool here
 # https://bookdown.org/yihui/rmarkdown/shiny-embedded.html
