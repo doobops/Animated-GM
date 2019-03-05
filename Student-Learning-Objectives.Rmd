@@ -3,7 +3,7 @@ title: "SLO Animated"
 output: html_document
 ---
 
-```{r, include=FALSE, echo=FALSE, results=FALSE, warning=FALSE, comment=FALSE}
+```{r, setup, include = FALSE, echo = FALSE, comment = FALSE, warning = FALSE, results = FALSE}
 
   knitr::opts_chunk$set(echo=FALSE, warning=FALSE, comment=FALSE)
 
@@ -13,7 +13,7 @@ output: html_document
   packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
                   "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
                 "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-                "gridExtra")
+                "gridExtra", "knitr", "shiny")
   lapply(packages, require, character.only = TRUE)
 
 # Set the path for Image Magick
@@ -50,60 +50,18 @@ output: html_document
 # Guide to theme references:
  "https://ggplot2.tidyverse.org/reference/theme.html"
 ```
-```{r, dataframe, include = FALSE, results = FALSE}
-
-  n <- 1000
-  rho.1 <- 0.75
-  rho.2 <- .5
-    
-  train <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
-    bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
-    mutate(id=row_number(),
-           subgroup = factor(ifelse(X11 == 1 & X21 == 1, "Both", 
-                             ifelse(X11 == 1, "ELL", 
-                                    ifelse(X21 == 1, "SPED", "None"))),
-                             levels = c("None", "ELL", "SPED", "Both"))) %>%
-    rename(pretest = X1, posttest= X2, ELL = X11, SPED = X21) 
-  
-  train$posttest <- ifelse(train$subgroup=="Both", train$posttest - 1.15, 
-                       ifelse(train$subgroup=="ELL", train$posttest - .65,
-                              ifelse(train$subgroup=="SPED", train$posttest - .85, train$posttest)))
-
-  cor(train[, sapply(train, is.numeric)],
-      use = "complete.obs", method = "pearson")
-```
-```{r, model-train-test, include = FALSE, results = FALSE}
-# Train model
-  mod <- lm(posttest ~ pretest + ELL + SPED, train)
-  
-  yint.ell <- mod$coefficients[1] + mod$coefficients[3]
-  yint.sped <- mod$coefficients[1] + mod$coefficients[4]
-  yint.none <- mod$coefficients[1]
-  yint.both <- mod$coefficients[1] + mod$coefficients[3] + mod$coefficients[4]
-  
-  beta = mod$coefficients[2]
-
-# Test model
-  pre = 0.5
-  test <- data.frame(id = c(1001:1004), 
-                            pretest = rep(pre, times = 4), 
-                            subgroup = c("None", "ELL", "SPED", "Both"), 
-                            ELL = c(0, 1, 0, 1), 
-                            SPED = c(0, 0, 1, 1))
-                     
-  test$yhat <- round(predict(mod, newdata = test), digits = 2)
+```{r, inputs, code = readLines("Inputs.R"), include = FALSE, results = FALSE}
 ```
 
 # Introduction
 In general terms, a student learning objective, or SLO, is an academic goal set for a student at the start of a school
-year. Goals can be generic for a group of students or student-specific, and can be generated with or without prior
+year. Goals are student- and assessment- specific, and can be generated with or without prior
 achievement information. Whether or not a student met the goal is determined by the student's end-of-year
 performance. In the context of educator evaluation, SLOs follow the aforementioned steps, and then student-level
 results are aggregated, in a variety of possible ways, to produce a teacher-level result.
 
 # Methodology
-NYCDOE's goal-setting process for the 2017-18 school year (henceforth referred to as simply "goal-setting")
-compares a student's end-of-year performance on a relevant assessment to a goal derived from their predicted
+NYCDOE's SLO process compares a student's end-of-year performance on a relevant assessment to a goal derived from their predicted
 performance. Based on this comparison, a credit value between 0.00 and 1.25 is assigned. Listed below are the five
 overarching steps involved:
 
@@ -116,8 +74,8 @@ overarching steps involved:
 4. **Aggregation**: Calculate an average teacher-level metric called "average credit" based on the teacher's students' credit results.
 5. **Rating Conversion**: Convert average credit to one of four HEDI ratings: "Highly Effective," "Effective," "Developing," or "Ineffective" using state-provided conversion chart.
 
-### Goal
-Goal-setting begins in the Fall of each school year when NYCDOE projects student-level goals. Goals are projected using previous year data. Data from the previous year is used to estimate the relationship between posttest scores and various other model variables (e.g., pretest scores, ELL status). In other words, previous year data is used to estimate coefficients for the prediction model, which is an ordinary least squares (OLS) regression. Coefficients are then scored using current year student data, thus generating goals for the current cohort of students. Students with whom coefficients are estimated are called the estimation sample. Students for whom goals are predicted are called the "prediction sample". Coefficients are estimated separately by assessment, and assessments are only modelled if there are at least 200 students in the estimation sample. 
+## Prediction models
+Goal-setting begins in the Fall of each school year when NYCDOE projects student-level goals. Goals are projected using previous year data. Data from the previous year is used to estimate the relationship between posttest scores and various other model variables (e.g., pretest scores, ELL status). In other words, previous year data is used to estimate coefficients for the prediction model, which is an two stage least squares (2SLS) regression. Coefficients are then scored using current year student data, thus generating goals for the current cohort of students. Students with whom coefficients are estimated are called the estimation sample. Students for whom goals are predicted are called the "prediction sample". Coefficients are estimated separately by assessment, and assessments are only modelled if there are at least 200 students in the estimation sample. 
 
 The plot below demonstrates how students from the estimation sample are used to estimate the relationship (slope and intercept) between prior achievement, subgroup and end of year score. The relationship is defined in such a way that the slope (i.e. relationship between prior achivement and end of year score) is static but the intercept floats based upon subgroup. 
 ```{r, plot-train-model, fig.width = 6, fig.height = 5}
@@ -150,7 +108,7 @@ The plot below demonstrates how students from the estimation sample are used to 
 animate(reganim)
 ```
 
-The model above is then used to generate goals for students in the prediction sample. To generate a given student's goal, we the student's prior achievement score and trace it along the line of best fit.
+The model above is then used to generate goals for students in the prediction sample. To generate a given student's goal, we the student's prior achievement score and trace it along the line of best fit. Notice howhow 
 ```{r, plot-test-model, fig.width = 6, fig.height = 5}
 # Fitted values for None and Both
   yhat_none <- test$yhat[test$subgroup == "None"]
@@ -209,7 +167,53 @@ The model above is then used to generate goals for students in the prediction sa
 animate(predanim)
 ```
 
-<!-- Simulate change in pretest & subgroup vs. goal: -->
+```{r, e}
+shinyAppDir(
+  system.file("D:/GitHub/Animated-SLO", package="shiny")
+)
+```
+
+
+```{r, echo=FALSE}
+shinyApp(
+ui <- fluidPage(
+
+      mainPanel(
+        sliderInput("pretest",
+                    "Select prior achievement score:",
+                    min = round(min(train$pretest), digits=2),
+                    max = round(max(train$pretest), digits=2),
+                    value = 0),
+        radioButtons("subgroup",
+                     "Select subgroup:",
+                     choices = c("None", "ELL", "SPED", "Both")),
+         textOutput("goal")
+      )
+   ),
+
+server <- function(input, output) {
+
+   output$goal <- renderText({
+     tmp <- data.frame(id = 10005, 
+                       pretest = input$pretest, 
+                       subgroup = input$subgroup, 
+                       ELL = ifelse(input$subgroup=="None" | input$subgroup=="SPED", 0, 1), 
+                       SPED = ifelse(input$subgroup=="None" | input$subgroup=="ELL", 0, 1))
+     paste("Your student's goal is", round(predict(mod, newdata = tmp), digits = 2))
+   })
+}
+)
+```
+
+
+
+
+
+
+
+
+
+<!-- Simulate goal vs. SE : -->
 ```{r}
 # https://github.com/thomasp85/gganimate/wiki/Animation-Composition
 ```
