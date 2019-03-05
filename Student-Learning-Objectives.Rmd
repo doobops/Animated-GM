@@ -1,6 +1,7 @@
 ---
 title: "SLO Animated"
 output: html_document
+runtime: shiny_prerendered
 ---
 
 ```{r, setup, include = FALSE, echo = FALSE, comment = FALSE, warning = FALSE, results = FALSE}
@@ -166,13 +167,6 @@ The model above is then used to generate goals for students in the prediction sa
  
 animate(predanim)
 ```
-
-```{r, e}
-shinyAppDir(
-  system.file("D:/GitHub/Animated-SLO", package="shiny")
-)
-```
-
 
 ```{r, echo=FALSE}
 shinyApp(

@@ -2,6 +2,13 @@
 # Program to create inputs for Student-Learning-Objectives.Rmd
 # -----------------------------------------------------------------------------#
 
+# Set up
+packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
+              "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
+              "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
+              "gridExtra", "knitr", "shiny")
+lapply(packages, require, character.only = TRUE)
+
 # Create dataframe
 n <- 1000
 rho.1 <- 0.75
