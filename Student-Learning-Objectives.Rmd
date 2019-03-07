@@ -1,7 +1,7 @@
 ---
 title: "SLO Animated"
 output: html_document
-runtime: shiny_prerendered
+runtime: shiny_render
 ---
 
 ```{r, setup, include = FALSE, echo = FALSE, comment = FALSE, warning = FALSE, results = FALSE}
