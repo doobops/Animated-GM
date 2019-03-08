@@ -10,26 +10,21 @@ packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr",
 lapply(packages, require, character.only = TRUE)
 
 # Create dataframe
-set.seed(02231992)
-
 n <- 1000
 rho.1 <- 0.75
-rho.2 <- .2
+rho.2 <- .3
 
-gened_prepost <- mvrnorm(n = n/4, mu = c(0.05, .10), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
-  dplyr::rename(pretest = "X1", posttest = "X2") %>%
-  mutate(ELL = 0,
-         SPED = 0)
 
-elled_prepost <- mvrnorm(n = n, mu = c(-0.15, -.1), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
-  bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
-    dplyr::rename(pretest = "X1", posttest= "X2", ELL = "X11", SPED = "X21") 
-  
-train <- bind_rows(gened_prepost, elled_prepost) %>% 
-  mutate(subgroup = factor(ifelse(ELL == 1 & SPED == 1, "Both", 
+train <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+  bind_cols(rmvbin(n = n, margprob = c(.5, .5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
+  dplyr::rename(pretest = X1, posttest= X2, ELL = X11, SPED = X21) %>%
+  mutate(subgroup = factor(ifelse(SPED == 1 & ELL == 1, "Both", 
                                   ifelse(ELL == 1, "ELL", 
                                          ifelse(SPED == 1, "SPED", "None"))),
-                           levels = c("None", "ELL", "SPED", "Both"))) 
+                           levels = c("None", "ELL", "SPED", "Both")),
+         posttest = ifelse(subgroup=="Both", posttest - .8, 
+                           ifelse(subgroup=="ELL", posttest -.4,
+                                  ifelse(subgroup=="SPED", posttest - .6, posttest + .35)))) 
 
 cormatrix <- 
 cor(train[, sapply(train, is.numeric)],
