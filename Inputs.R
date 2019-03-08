@@ -14,17 +14,20 @@ n <- 1000
 rho.1 <- 0.75
 rho.2 <- .5
 
-train <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
-  bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
-  mutate(subgroup = factor(ifelse(X11 == 1 & X21 == 1, "Both", 
-                                  ifelse(X11 == 1, "ELL", 
-                                         ifelse(X21 == 1, "SPED", "None"))),
-                           levels = c("None", "ELL", "SPED", "Both"))) %>%
-  dplyr::rename(pretest = X1, posttest= X2, ELL = X11, SPED = X21) 
+gened_prepost <- mvrnorm(n = n, mu = c(0.05, .10), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+  dplyr::rename(pretest = "X1", posttest = "X2") %>%
+  mutate(ELL = 0,
+         SPED = 0)
 
-train$posttest <- ifelse(train$subgroup=="Both", train$posttest - 1.15, 
-                         ifelse(train$subgroup=="ELL", train$posttest - .65,
-                                ifelse(train$subgroup=="SPED", train$posttest - .85, train$posttest)))
+elled_prepost <- mvrnorm(n = n/2, mu = c(-0.10, -.05), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+  bind_cols(rmvbin(n = n/2, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
+    dplyr::rename(pretest = "X1", posttest= "X2", ELL = "X11", SPED = "X21") 
+  
+train <- bind_rows(gened_prepost, elled_prepost) %>% 
+  mutate(subgroup = factor(ifelse(ELL == 1 & SPED == 1, "Both", 
+                                  ifelse(ELL == 1, "ELL", 
+                                         ifelse(SPED == 1, "SPED", "None"))),
+                           levels = c("None", "ELL", "SPED", "Both"))) 
 
 cormatrix <- 
 cor(train[, sapply(train, is.numeric)],
