@@ -10,17 +10,19 @@ packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr",
 lapply(packages, require, character.only = TRUE)
 
 # Create dataframe
+set.seed(02231992)
+
 n <- 1000
 rho.1 <- 0.75
-rho.2 <- .5
+rho.2 <- .2
 
-gened_prepost <- mvrnorm(n = n, mu = c(0.05, .10), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+gened_prepost <- mvrnorm(n = n/4, mu = c(0.05, .10), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
   dplyr::rename(pretest = "X1", posttest = "X2") %>%
   mutate(ELL = 0,
          SPED = 0)
 
-elled_prepost <- mvrnorm(n = n/2, mu = c(-0.10, -.05), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
-  bind_cols(rmvbin(n = n/2, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
+elled_prepost <- mvrnorm(n = n, mu = c(-0.15, -.1), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow = 2), empirical = TRUE) %>% data.frame() %>%
+  bind_cols(rmvbin(n = n, margprob = c(0.5, 0.5), bincorr = matrix(c(1, rho.2,rho.2, 1), ncol = 2)) %>% data.frame()) %>%
     dplyr::rename(pretest = "X1", posttest= "X2", ELL = "X11", SPED = "X21") 
   
 train <- bind_rows(gened_prepost, elled_prepost) %>% 
