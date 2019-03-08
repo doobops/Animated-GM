@@ -22,8 +22,8 @@ train <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, rho.1, rho.1, 1), nrow
                                   ifelse(ELL == 1, "ELL", 
                                          ifelse(SPED == 1, "SPED", "None"))),
                            levels = c("None", "ELL", "SPED", "Both")),
-         posttest = ifelse(subgroup=="Both", posttest - .8, 
-                           ifelse(subgroup=="ELL", posttest -.4,
+         posttest = ifelse(subgroup=="Both", posttest - 1, 
+                           ifelse(subgroup=="ELL", posttest -.25,
                                   ifelse(subgroup=="SPED", posttest - .6, posttest + .35)))) 
 
 cormatrix <- 
