@@ -11,12 +11,18 @@ source("D:/GitHub/Animated-SLO/Inputs.R")
 source("C:/Users/Christina Kim/Documents/GitHub/Animated-SLO/Inputs.R")
 
 # Assign colors for graphing subgroups -----------------------------------------
-Both <- "#ff7373"
-ELL <- "#ffad5a" 
-SPED <- "#4f9da6"
-None <- "#280c64" 
+Both <- "#70ad47"
+ELL <- "#ed7d31" 
+SPED <- "#ffc000"
+None <- "#4472c4" 
 
 mycolors <- c( "None" = None, "ELL" = ELL, "SPED" = SPED, "Both" = Both)
+
+yellow <- "#ffc000"
+orange <- "#ed7d31"
+green <- "#702d47"
+darkblue <- "#4472c4"
+lightblue <- "#5b9bd5"
 
 # Create default theme ---------------------------------------------------------    
 mytheme <-
@@ -31,13 +37,9 @@ mytheme <-
 # Fitted values for None and Both
 yhat_none <- test$yhat[test$subgroup == "None"]
 
-# Grob for pretest annotation
-txt_pretest <- textGrob(paste("Pretest=", pre), 
-                        gp = gpar(fontsize = 11, fontface = "bold"))
-
 # Grobs for yhat annotations  
 txt_yhat_none <- textGrob(paste(yhat_none), 
-                          gp = gpar(fontsize = 10, fontface = "bold"),
+                          gp = gpar(fontsize = 12, fontface = "bold", col = orange),
                           just = c("left", "center")) 
 
 # Grobs for explanation
@@ -45,16 +47,16 @@ xaxis <- textGrob(paste("The horizontal axis contains \nstudents' scores on prio
                   gp = gpar(fontsize = 10, fontface = "bold"), just = c("left", "top"))
 yaxis <- textGrob(paste("The vertical axis contains \nstudent's expected scores \non their end of year exam."),
                   gp = gpar(fontsize = 10, fontface = "bold"), just = c("left", "top"))
-step0 <- textGrob(paste("Each dot represents a student \nwith no particular needs"),
-                  gp = gpar(fontsize = 11, fontface = "bold", col = None), just = c("left", "center"))
-step1 <- textGrob(paste("This line of best fit represents the \nrelationship between prior achievement and \nend of year score for students \nwith no particular needs"), 
-                  gp = gpar(fontsize = 10, fontface = "bold"))
+step0 <- textGrob(paste("Each dot represents \na student with \nno particular needs"),
+                  gp = gpar(fontsize = 10, fontface = "bold", col = None), just = c("center", "center"))
+step1 <- textGrob(paste("This line of best fit \nrepresents the \nrelationship between \nprior achievement \nand end of year score \nfor students \nwith no particular \nneeds"), 
+                  gp = gpar(fontsize = 10, fontface = "bold", col = None), just = c("center"))
 step2 <- textGrob(paste("To get your student's estimated \nend of year score, we begin with \nyour student's prior achievement score. \nLet's say this is 0.5"),
-                  gp = gpar(fontsize = 10), just = c("left"))
+                  gp = gpar(fontsize = 10, fontface = "bold"), just = c("left"))
 step3 <- textGrob(paste("which we locate on \nthe line of best fit"),
-                  gp = gpar(fontsize = 10), just = c("left", "bottom"))
+                  gp = gpar(fontsize = 10, fontface = "bold"), just = c("left", "bottom"))
 step4 <- textGrob(paste("to get your student's \nexpected end of year score"),
-                  gp = gpar(fontsize = 10), just = c("left"))
+                  gp = gpar(fontsize = 10, fontface = "bold"), just = c("left"))
 
 # Animate
 predanim <- 
@@ -68,46 +70,49 @@ predanim <-
   geom_point(color = None) +
   
   # Explain points: 4 - 5
-  annotate("rect", xmin = -2.5, xmax = 2.5, ymin = -2, ymax = 2, alpha = .2) + 
-  annotation_custom(step0, xmin = 1, xmax = 1, ymin = -1.5, ymax = -1.5) + 
+  annotate("rect", xmin = -2.5, xmax = 2.5, ymin = -2, ymax = 2, alpha = .2, fill = yellow) + 
+  annotation_custom(step0, xmin = -2.5, xmax = -2.5, ymin = 2, ymax = 2) + 
   
   # Insert best fit line: 6 
   geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
   
   # Explain best fit line: 7
-  annotation_custom(step1, xmin = 2, xmax = 2, ymin = 3, ymax = 3) +
+  annotation_custom(step1, xmin = 2, xmax = 2, ymin = 0, ymax = 0) +
   
-  # Explain how we start: 8
+  # Pause: 8
+  geom_point(x=0, y=0, color = "white") +
+  
+  # Explain how we start: 9
   annotation_custom(step2, xmin = .74, xmax = .74, ymin = -3.5, ymax = -3.5) +
   
-  # Pretest setup: 10 - 11
-  annotation_custom(txt_pretest, xmin = pre, xmax = pre, ymin = min(train$posttest), ymax = min(train$posttest)) +
-  geom_point(data = test[test$subgroup == "None", ], aes(x = pretest, y = -Inf), color="black", size = 3) +
+  # Pretest setup: 10 
+  geom_point(data = test[test$subgroup == "None", ], aes(x = pretest, y = -Inf), color = orange, size = 3) +
   
   # Rise: 12 
-  geom_segment(aes(x = pre, xend = pre, y = -Inf, yend = yhat_none), color = "black", linetype = 2, size=.75) +
+  geom_segment(aes(x = pre, xend = pre, y = -Inf, yend = yhat_none), color = orange, linetype = 2, size=.75) +
   
   # Explain rise: 13
-  annotation_custom(step3, xmin = pre, xmax = pre, ymin = yhat_none, ymax = yhat_none) +
+  annotation_custom(step3, xmin = .74, xmax = .74, ymin = -2.5, ymax = -2.5) +
   
   # Run: 14
-  geom_segment(aes(x = pre, xend = -Inf, y = yhat_none, yend = yhat_none), color = "black", linetype = 2, size = .75, arrow=arrow(length=unit(0.4,"cm"))) +
+  geom_segment(aes(x = pre, xend = -Inf, y = yhat_none, yend = yhat_none), color = orange, linetype = 2, size = .75, arrow=arrow(length=unit(0.4,"cm"))) +
   
   # Explain run: 15
   annotation_custom(step4, xmin = -4, xmax = -4, ymin = yhat_none + .5, ymax = yhat_none + .5 ) + 
   
   # Locate yhat: 16 - 17
-  geom_point(data = test[test$subgroup == "None", ], aes(x = -Inf, y = yhat_none), color="black") +
+  geom_point(data = test[test$subgroup == "None", ], aes(x = -Inf, y = yhat_none), color = orange, size = 3) +
   annotation_custom(txt_yhat_none, xmin = -4, xmax = -4, ymin = yhat_none - .5, ymax = yhat_none - .5 ) + 
   
-  # Pause
+  # Pause: 18 - 19
+  geom_point(x=0, y=0, color = "white") + 
   geom_point(x=0, y=0, color = "white") + 
   
   # Transitions
-  transition_layers(layer_length = 1, 
+  transition_layers(layer_length = 5, 
                     transition_length = 1,
                     from_blank = TRUE, 
-                    keep_layers = c(2, 1, Inf, 1, 2, 1, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf
+                    keep_layers = c(2, 1, Inf, 2, 3, Inf, 1, 2, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf, Inf
                     )) + 
   
   enter_appear()+
@@ -124,7 +129,8 @@ predanim <-
   
   mytheme
 
-animate(predanim)
+animate(predanim, fps = 5)
+anim_save(filename="predanim.gif")
 
 
 # Regression for different subgroups ------------------------------------------------------------
@@ -140,7 +146,7 @@ note4 <- textGrob(paste("This line represents the relationship between \nprior a
                     gp = gpar(fontsize = 9, fontface = "bold", col = Both), just=c("left", "bottom"))
 
 # Plot
-reganim <- 
+reg_bysub <- 
   
 ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) + 
   
@@ -178,5 +184,5 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   enter_fade()+
   exit_fade()
 
-
-animate(reganim)
+animate(reg_bysub, fps = 5)
+anim_save(filename="reg_bysub.gif")
