@@ -1,15 +1,44 @@
 # -----------------------------------------------------------------------------#
-# Program to create inputs for Student-Learning-Objectives.Rmd
+# Program to create inputs for SLO-Animated REPO Scripts
+#   1. Install packages
+#   2. Set color palette
+#   3. Create ggplot theme
+#   4. Create dataframe 
+#   5. Create models
 # -----------------------------------------------------------------------------#
 
-# Set up
+# Install packages -------------------------------------------------------------
+rm(list=ls())
+
 packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
               "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
               "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-              "gridExtra", "knitr", "shiny")
+              "gridExtra", "knitr", "shiny", "RCurl")
 lapply(packages, require, character.only = TRUE)
 
-# Create dataframe
+# Assign colors for graphing subgroups -----------------------------------------
+Both <- "#70ad47"
+ELL <- "#ed7d31" 
+SPED <- "#ffc000"
+None <- "#4472c4" 
+
+mycolors <- c( "None" = None, "ELL" = ELL, "SPED" = SPED, "Both" = Both)
+
+yellow <- "#ffc000"
+orange <- "#ed7d31"
+green <- "#702d47"
+darkblue <- "#4472c4"
+lightblue <- "#5b9bd5"
+
+# Create default theme ---------------------------------------------------------    
+mytheme <-
+  theme(
+    panel.background = element_rect(fill = "white"), 
+    axis.line = element_line(),
+    legend.key=element_blank()
+  )
+
+# Create dataframe -------------------------------------------------------------
 n <- 1000
 rho.1 <- 0.75
 rho.2 <- .3

@@ -1,36 +1,10 @@
-# Install packages -------------------------------------------------------------
-rm(list=ls())
+# Read in Inputs.R--------------------------------------------------------------
 
-packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
-              "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
-              "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-              "gridExtra", "knitr", "shiny")
-lapply(packages, require, character.only = TRUE)
+# From GitHub 
+inputscript <- 
+  getURL("https://raw.githubusercontent.com/doobops/Animated-SLO/master/Inputs.R", ssl.verifypeer = FALSE)
 
-source("D:/GitHub/Animated-SLO/Inputs.R")
-source("C:/Users/Christina Kim/Documents/GitHub/Animated-SLO/Inputs.R")
-
-# Assign colors for graphing subgroups -----------------------------------------
-Both <- "#70ad47"
-ELL <- "#ed7d31" 
-SPED <- "#ffc000"
-None <- "#4472c4" 
-
-mycolors <- c( "None" = None, "ELL" = ELL, "SPED" = SPED, "Both" = Both)
-
-yellow <- "#ffc000"
-orange <- "#ed7d31"
-green <- "#702d47"
-darkblue <- "#4472c4"
-lightblue <- "#5b9bd5"
-
-# Create default theme ---------------------------------------------------------    
-mytheme <-
-  theme(
-    panel.background = element_rect(fill = "white"), 
-    axis.line = element_line(),
-    legend.key=element_blank()
-  )
+eval(parse(text = inputscript))
 
 # Explain regression -----------------------------------------------------------
 
@@ -50,7 +24,7 @@ yaxis <- textGrob(paste("The vertical axis contains \nstudent's expected scores 
 step0 <- textGrob(paste("Each dot represents \na student with \nno particular needs"),
                   gp = gpar(fontsize = 10, fontface = "bold", col = None), just = c("center", "center"))
 step1 <- textGrob(paste("This line of best fit \nrepresents the \nrelationship between \nprior achievement \nand end of year score \nfor students \nwith no particular \nneeds"), 
-                  gp = gpar(fontsize = 10, fontface = "bold", col = None), just = c("center"))
+                  gp = gpar(fontsize = 10, fontface = "bold", col = None), just = c("left"))
 step2 <- textGrob(paste("To get your student's estimated \nend of year score, we begin with \nyour student's prior achievement score. \nLet's say this is 0.5"),
                   gp = gpar(fontsize = 10, fontface = "bold"), just = c("left"))
 step3 <- textGrob(paste("which we locate on \nthe line of best fit"),
@@ -77,7 +51,7 @@ predanim <-
   geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
   
   # Explain best fit line: 7
-  annotation_custom(step1, xmin = 2, xmax = 2, ymin = 0, ymax = 0) +
+  annotation_custom(step1, xmin = 3, xmax = 3, ymin = 0, ymax = 0) +
   
   # Pause: 8
   geom_point(x=0, y=0, color = "white") +
@@ -122,7 +96,7 @@ predanim <-
        y = "End of Year Score",
        color = "Student Profile") +
   
-  lims(x = c(-4, 4),
+  lims(x = c(-4.5, 4.5),
        y = c(-4, 4)) +
   
   coord_cartesian(clip="off") +
