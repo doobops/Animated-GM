@@ -1,8 +1,10 @@
 # Read in Inputs.R--------------------------------------------------------------
 
 # From GitHub 
+require("RCurl")
+
 inputscript <- 
-  getURL("https://raw.githubusercontent.com/doobops/Animated-SLO/master/Inputs.R", ssl.verifypeer = FALSE)
+  getURL("https://raw.githubusercontent.com/doobops/Animated-GM/master/Inputs.R", ssl.verifypeer = FALSE)
 
 eval(parse(text = inputscript))
 
@@ -104,7 +106,7 @@ predanim <-
   mytheme
 
 animate(predanim, fps = 5)
-anim_save(filename="predanim.gif")
+anim_save(filename="how_to_regress.gif")
 
 
 # Regression for different subgroups ------------------------------------------------------------
@@ -160,4 +162,51 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   exit_fade()
 
 animate(reg_bysub, fps = 5)
-anim_save(filename="reg_bysub.gif")
+anim_save(filename="intercept_shift.gif")
+
+# Tina, Tom and Jordan ---------------------------------------------------------
+
+jordan <- readPNG("D:/GitHub/Animated-SLO/studentjordan_64bit.png")
+tom <- readPNG("D:/GitHub/Animated-SLO/studenttom_64bit.png")
+tina <- readPNG("D:/GitHub/Animated-SLO/studenttina_64bit.png")
+
+jordanGrob <- rasterGrob(jordan, interpolate = TRUE)
+tomGrob <- rasterGrob(tom, interpolate = TRUE)
+tinaGrob <- rasterGrob(tina, interpolate = TRUE)
+
+tina_tom_jordan <- 
+ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) + 
+  
+  geom_point(data = train[train$subgroup=="None", ], alpha = .75) +
+  geom_point(data = train[train$subgroup=="ELL", ], alpha = .75) +
+  geom_point(data = train[train$subgroup=="SPED", ], alpha = .75) +
+  geom_point(data = train[train$subgroup=="Both", ], alpha = .75) + 
+  
+  geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
+  geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1) +
+  geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1) +
+  geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1) +
+  
+  annotation_custom(jordanGrob, xmin = 2, xmax = 2.75, ymin = -4, ymax = -3.25) +
+  
+  annotation_custom(tomGrob, xmin = -2, xmax = -1.25, ymin = -4, ymax = -3.25) +
+  
+  annotation_custom(tinaGrob, xmin = -.5, xmax = .25, ymin = -4, ymax = -3.25) +
+  
+  coord_cartesian(clip="off") +
+  
+  scale_colour_manual(breaks = c("None", "ELL", "SPED", "Both"), values = mycolors) + 
+  
+  labs(x = "Prior Achievement Score",
+       y = "End of Year Score",
+       color = "Student Profile") + 
+  
+  mytheme +
+  
+  transition_layers(layer_length = 5, transition_length = 1) + 
+  
+  enter_fade()+
+  exit_fade()
+
+animate(tina_tom_jordan, fps = 5)
+anim_save(filename="tina_tom_jordan.gif")
