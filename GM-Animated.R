@@ -153,7 +153,8 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   mytheme +
   
   transition_layers(layer_length = 5, transition_length = 1,
-                    from_blank = TRUE, keep_layers = c(rep(c(2, 1, 1, 1), 4))) +
+                    # from_blank = TRUE, keep_layers = c(rep(c(2, 1, 1, 1), 4))) +
+                    from_blank = TRUE, keep_layers = c(rep(c(3, 2, 1, 1), 4))) +
 
   enter_fade()+
   exit_fade()
