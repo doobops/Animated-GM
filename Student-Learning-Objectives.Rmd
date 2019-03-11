@@ -53,32 +53,6 @@ runtime: shiny
 ```
 ```{r, inputs, code = readLines("Inputs.R"), include = FALSE, results = FALSE}
 ```
-
-# Introduction
-In general terms, a student learning objective, or SLO, is an academic goal set for a student at the start of a school
-year. Goals are student- and assessment- specific, and can be generated with or without prior
-achievement information. Whether or not a student met the goal is determined by the student's end-of-year
-performance. In the context of educator evaluation, SLOs follow the aforementioned steps, and then student-level
-results are aggregated, in a variety of possible ways, to produce a teacher-level result.
-
-# Methodology
-NYCDOE's SLO process compares a student's end-of-year performance on a relevant assessment to a goal derived from their predicted
-performance. Based on this comparison, a credit value between 0.00 and 1.25 is assigned. Listed below are the five
-overarching steps involved:
-
-1. **Goal**: Generate a student goal using a regression-based approach that includes incoming achievement data (e.g., prior year State ELA and Math assessment scores, fall NYC Performance Task baseline scores, etc.) and student demographic data (e.g., special education status, socioeconomic status, etc.).
-
-2. **Credit Band**: Generate a "credit band" around the student goal based on the spread of end-of-year scores around goals.
-
-3. **Credit Assignment**: Locate the student's end-of-year performance along the student's credit band and assign credit between 0.00 and 1.25, depending on the position of the end-of-year performance within the credit band.
-
-4. **Aggregation**: Calculate an average teacher-level metric called "average credit" based on the teacher's students' credit results.
-5. **Rating Conversion**: Convert average credit to one of four HEDI ratings: "Highly Effective," "Effective," "Developing," or "Ineffective" using state-provided conversion chart.
-
-## Prediction models
-Goal-setting begins in the Fall of each school year when NYCDOE projects student-level goals. Goals are projected using previous year data. Data from the previous year is used to estimate the relationship between posttest scores and various other model variables (e.g., pretest scores, ELL status). In other words, previous year data is used to estimate coefficients for the prediction model, which is an two stage least squares (2SLS) regression. Coefficients are then scored using current year student data, thus generating goals for the current cohort of students. Students with whom coefficients are estimated are called the estimation sample. Students for whom goals are predicted are called the "prediction sample". Coefficients are estimated separately by assessment, and assessments are only modelled if there are at least 200 students in the estimation sample. 
-
-The plot below demonstrates how students from the estimation sample are used to estimate the relationship (slope and intercept) between prior achievement, subgroup and end of year score. The relationship is defined in such a way that the slope (i.e. relationship between prior achivement and end of year score) is static but the intercept floats based upon subgroup. 
 ```{r, plot-train-model, fig.width = 6, fig.height = 5}
 # Animate  
   reganim <- ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
@@ -108,8 +82,6 @@ The plot below demonstrates how students from the estimation sample are used to 
 
 animate(reganim)
 ```
-
-The model above is then used to generate goals for students in the prediction sample. To generate a given student's goal, we the student's prior achievement score and trace it along the line of best fit. Notice howhow 
 ```{r, plot-test-model, fig.width = 6, fig.height = 5}
 # Fitted values for None and Both
   yhat_none <- test$yhat[test$subgroup == "None"]
@@ -167,7 +139,6 @@ The model above is then used to generate goals for students in the prediction sa
  
 animate(predanim)
 ```
-
 ```{r, echo=FALSE}
 shinyApp(
 ui <- fluidPage(

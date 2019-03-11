@@ -13,7 +13,7 @@ rm(list=ls())
 packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
               "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
               "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-              "gridExtra", "knitr", "shiny", "RCurl")
+              "gridExtra", "knitr", "shiny", "RCurl", "magrittr")
 lapply(packages, require, character.only = TRUE)
 
 # Assign colors for graphing subgroups -----------------------------------------
