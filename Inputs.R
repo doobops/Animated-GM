@@ -13,8 +13,12 @@ rm(list=ls())
 packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
               "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
               "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-              "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png")
+              "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png", "readPNG")
 lapply(packages, require, character.only = TRUE)
+
+# Assign path to Repo ---------------------------------------------------------#
+work <- getwd()
+gitpath <- paste0(work, "/GitHub/Animated-GM")
 
 # Assign colors for graphing subgroups -----------------------------------------
 Both <- "#70ad47"
