@@ -10,9 +10,6 @@ eval(parse(text = inputscript))
 
 # Explain regression -----------------------------------------------------------
 
-# Fitted values for None and Both
-yhat_none <- test$yhat[test$subgroup == "None"]
-
 # Grobs for yhat annotations  
 txt_yhat_none <- textGrob(paste(yhat_none), 
                           gp = gpar(fontsize = 12, fontface = "bold", col = orange),
@@ -166,47 +163,77 @@ anim_save(filename="intercept_shift.gif")
 
 # Tina, Tom and Jordan ---------------------------------------------------------
 
-jordan <- readPNG("D:/GitHub/Animated-SLO/studentjordan_64bit.png")
-tom <- readPNG("D:/GitHub/Animated-SLO/studenttom_64bit.png")
-tina <- readPNG("D:/GitHub/Animated-SLO/studenttina_64bit.png")
+# Image Grobs
+jordanGrob <- rasterGrob(jordanPNG, interpolate = TRUE)
+tomGrob <- rasterGrob(tomPNG, interpolate = TRUE)
+tinaGrob <- rasterGrob(tinaPNG, interpolate = TRUE)
 
-jordanGrob <- rasterGrob(jordan, interpolate = TRUE)
-tomGrob <- rasterGrob(tom, interpolate = TRUE)
-tinaGrob <- rasterGrob(tina, interpolate = TRUE)
+# Annotation Grobs
+yhat_jordan_grob <- textGrob(paste(yhat_jordan), 
+                          gp = gpar(fontsize = 12, fontface = "bold", col = SPED))
+yhat_tom_grob <- textGrob(paste(yhat_tom), 
+                           gp = gpar(fontsize = 12, fontface = "bold", col = ELL))
+yhat_tina_grob <- textGrob(paste(yhat_tina), 
+                           gp = gpar(fontsize = 12, fontface = "bold", col = None))
+
+# Annotation for YAXIS
+yaxisGrob <- textGrob(paste("Estimated \nEnd of \nYear Score"), 
+                      gp = gpar(fontface = "bold", col = "black"), just = c("left", "center")) 
 
 tina_tom_jordan <- 
 ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) + 
   
-  geom_point(data = train[train$subgroup=="None", ], alpha = .75) +
-  geom_point(data = train[train$subgroup=="ELL", ], alpha = .75) +
-  geom_point(data = train[train$subgroup=="SPED", ], alpha = .75) +
-  geom_point(data = train[train$subgroup=="Both", ], alpha = .75) + 
+  annotation_custom(yaxisGrob, xmin = -3.5, xmax = -3.5, ymin = yhat_tina+1, ymax = yhat_tina+1) +
+  
+  geom_point(alpha = 0.25) +
   
   geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
   geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1) +
   geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1) +
   geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1) +
   
-  annotation_custom(jordanGrob, xmin = 2, xmax = 2.75, ymin = -4, ymax = -3.25) +
+  annotation_custom(jordanGrob, xmin = 1.625, xmax = 2.375, ymin = -4, ymax = -3.25) +
+  annotation_custom(tomGrob, xmin = -1.625, xmax = -2.375, ymin = -4, ymax = -3.25) +
+  annotation_custom(tinaGrob, xmin = 0.375, xmax = -0.375, ymin = -4, ymax = -3.25) +
   
-  annotation_custom(tomGrob, xmin = -2, xmax = -1.25, ymin = -4, ymax = -3.25) +
+  annotate("segment", x = jordanpre, xend = jordanpre, y = -3.25 , yend = yhat_jordan, color = SPED, 
+           size = 1, linetype = 2) + 
+  annotate("segment", x = jordanpre, xend = -3, y = yhat_jordan, yend = yhat_jordan, color = SPED, 
+           size = 1, linetype = 2, arrow=arrow(length=unit(0.4,"cm"))) +
+  annotation_custom(yhat_jordan_grob, xmin = -3.25, xmax = -3.25, ymin = yhat_jordan, ymax = yhat_jordan+.3) +
   
-  annotation_custom(tinaGrob, xmin = -.5, xmax = .25, ymin = -4, ymax = -3.25) +
+  annotate("segment", x = tompre, xend = tompre, y = -3.25 , yend = yhat_tom, color = ELL, 
+           size = 1, linetype = 2) + 
+  annotate("segment", x = tompre, xend = -3, y = yhat_tom, yend = yhat_tom, color = ELL, 
+           size = 1, linetype = 2, arrow=arrow(length=unit(0.4,"cm"))) +
+  annotation_custom(yhat_tom_grob, xmin = -3.25, xmax = -3.25, ymin = yhat_tom, ymax = yhat_tom+.3) +
+  
+  annotate("segment", x = tinapre, xend = tinapre, y = -3.25 , yend = yhat_tina, color = None, 
+           size = 1, linetype = 2) +  
+  annotate("segment", x = tinapre, xend = -3, y = yhat_tina, yend = yhat_tina, color = None, 
+           size = 1, linetype = 2, arrow=arrow(length=unit(0.4,"cm"))) +
+  annotation_custom(yhat_tina_grob, xmin = -3.25, xmax = -3.25, ymin = yhat_tina, ymax = yhat_tina+.3) +
   
   coord_cartesian(clip="off") +
   
   scale_colour_manual(breaks = c("None", "ELL", "SPED", "Both"), values = mycolors) + 
   
   labs(x = "Prior Achievement Score",
-       y = "End of Year Score",
+       y = " ",
        color = "Student Profile") + 
+  
+  lims(x = c(-3, 3),
+       y = c(-4, 4)) +
   
   mytheme +
   
-  transition_layers(layer_length = 5, transition_length = 1) + 
+  theme(axis.text.y = element_blank(),
+        axis.line = element_line(color = "grey77")) + 
+  
+  transition_layers(layer_length = 5, transition_length = 1, from_blank = FALSE) + 
   
   enter_fade()+
   exit_fade()
 
-animate(tina_tom_jordan, fps = 5)
+animate(tina_tom_jordan, fps = 1)
 anim_save(filename="tina_tom_jordan.gif")

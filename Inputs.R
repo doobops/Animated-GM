@@ -16,9 +16,13 @@ packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr",
               "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png", "readPNG")
 lapply(packages, require, character.only = TRUE)
 
-# Assign path to Repo ---------------------------------------------------------#
-work <- getwd()
+# Assign path to repo and import icons -----------------------------------------
+work <- getwd
 gitpath <- paste0(work, "/GitHub/Animated-GM")
+
+jordanPNG <- readPNG(file.path(gitpath, "/studentjordan_64bit.png"))
+tomPNG <- readPNG(file.path(gitpath, "/studenttom_64bit.png"))
+tinaPNG <- readPNG(file.path(gitpath, "/studenttina_64bit.png"))
 
 # Assign colors for graphing subgroups -----------------------------------------
 Both <- "#70ad47"
@@ -74,10 +78,21 @@ cor(train[, sapply(train, is.numeric)],
 
 # Test model
   pre = 0.5
+  
+  jordanpre = -2
+  tompre = 0
+  tinapre = 2
+  
   test <- data.frame(id = c(1001:1004), 
-                     pretest = rep(pre, times = 4), 
-                     subgroup = c("None", "ELL", "SPED", "Both"), 
-                     ELL = c(0, 1, 0, 1), 
-                     SPED = c(0, 0, 1, 1))
+                     pretest = c(pre, jordanpre, tompre, tinapre), 
+                     subgroup = c("None", "SPED", "ELL", "None"), 
+                     ELL = c(0, 1, 0, 0), 
+                     SPED = c(0, 0, 1, 0))
   
   test$yhat <- round(predict(mod, newdata = test), digits = 2)
+  
+  yhat_none <- test$yhat[test$subgroup == "None"]
+  yhat_jordan <-test$yhat[test$id==1002] 
+  yhat_tom <-test$yhat[test$id==1003] 
+  yhat_tina <- test$yhat[test$id==1004] 
+  
