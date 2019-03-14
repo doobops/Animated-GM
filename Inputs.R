@@ -17,14 +17,6 @@ packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr",
               "rstudioapi")
 lapply(packages, require, character.only = TRUE)
 
-# Assign path to repo and import icons -----------------------------------------
-current_path <- gsub(x = paste0(getSourceEditorContext()$path), pattern = "/Inputs.R", "")
-setwd(file.path(current_path ))
-
-jordanPNG <- readPNG("studentjordan_64bit.png")
-tomPNG <- readPNG("studenttom_64bit.png")
-tinaPNG <- readPNG("studenttina_64bit.png")
-
 # Assign colors for graphing subgroups -----------------------------------------
 Both <- "#70ad47"
 ELL <- "#ed7d31" 
