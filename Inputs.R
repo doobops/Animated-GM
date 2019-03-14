@@ -13,16 +13,17 @@ rm(list=ls())
 packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr", 
               "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
               "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
-              "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png", "readPNG")
+              "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png", "readPNG",
+              "rstudioapi")
 lapply(packages, require, character.only = TRUE)
 
 # Assign path to repo and import icons -----------------------------------------
-work <- getwd
-gitpath <- paste0(work, "/GitHub/Animated-GM")
+current_path <- gsub(x = paste0(getSourceEditorContext()$path), pattern = "/Inputs.R", "")
+setwd(file.path(current_path ))
 
-jordanPNG <- readPNG(file.path(gitpath, "/studentjordan_64bit.png"))
-tomPNG <- readPNG(file.path(gitpath, "/studenttom_64bit.png"))
-tinaPNG <- readPNG(file.path(gitpath, "/studenttina_64bit.png"))
+jordanPNG <- readPNG("studentjordan_64bit.png")
+tomPNG <- readPNG("studenttom_64bit.png")
+tinaPNG <- readPNG("studenttina_64bit.png")
 
 # Assign colors for graphing subgroups -----------------------------------------
 Both <- "#70ad47"
