@@ -1,16 +1,40 @@
 # Read in Inputs.R--------------------------------------------------------------
 
 # From GitHub 
-require("RCurl")
-
-inputscript <- 
-  getURL("https://raw.githubusercontent.com/doobops/Animated-GM/master/Inputs.R", ssl.verifypeer = FALSE)
-
-eval(parse(text = inputscript))
+  require("RCurl")
+  
+  inputscript <- 
+    getURL("https://raw.githubusercontent.com/doobops/Animated-GM/master/Inputs.R", ssl.verifypeer = FALSE)
+  
+  eval(parse(text = inputscript))
 
 # Connect to Repo
-current_path <- gsub(x = paste0(getSourceEditorContext()$path), pattern = "/GM-Animated.R", "")
-setwd(file.path(current_path))
+  current_path <- gsub(x = paste0(getSourceEditorContext()$path), pattern = "/GM-Animated.R", "")
+  setwd(file.path(current_path))
+  getwd()
+
+# Read in images ---------------------------------------------------------------  
+  
+# Import 
+  jordanPNG <- readPNG("studentjordan_64bit.png")
+  tomPNG <- readPNG("studenttom_64bit.png")
+  tinaPNG <- readPNG("studenttina_64bit.png")
+  peerboy_PNG <- readPNG("peer_boy_64bit.png")
+  peergirl_PNG <- readPNG("peer_girl_64bit.png")
+  jillPNG <- readPNG("studentjill_64bit.png")
+  
+  peerexample_PNG <- readPNG("peer_example_64bit.png")
+  
+# Create Grobs
+  jordanGrob <- rasterGrob(jordanPNG, interpolate = TRUE)
+  tomGrob <- rasterGrob(tomPNG, interpolate = TRUE)
+  tinaGrob <- rasterGrob(tinaPNG, interpolate = TRUE)
+  peerboyGrob <- rasterGrob(peerboy_PNG, interpolate = TRUE) 
+  peergirlGrob <- rasterGrob(peergirl_PNG, interpolate = TRUE) 
+  jillGrob <- rasterGrob(jillPNG, interpolate = TRUE) 
+  
+  peerexampleGrob <- rasterGrob(peerexample_PNG, interpolate = TRUE) 
+
 
 # Explain regression -----------------------------------------------------------
 
@@ -129,22 +153,22 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   
   geom_point(data = train[train$subgroup=="None", ], alpha = .75) +
   geom_abline(intercept = yint.none, slope = beta, color = None, size = 1) +
-  annotation_custom(note1, xmin = -3.25, xmax = -3.25, ymin = 2.5, ymax = 2.5) + 
+  annotation_custom(note1, xmin = -3, xmax = -3, ymin = 2.5, ymax = 2.5) + 
   geom_point(x=0, y=0, color = "white") +
   
   geom_point(data = train[train$subgroup=="ELL", ], alpha = .75) +
   geom_abline(intercept = yint.ell, slope = beta, color = ELL, size = 1) +
-  annotation_custom(note2, xmin = -3.25, xmax = -3.25, ymin = 2.5, ymax = 2.5) + 
+  annotation_custom(note2, xmin = -3, xmax = -3, ymin = 2.5, ymax = 2.5) + 
   geom_point(x=0, y=0, color = "white") +
   
   geom_point(data = train[train$subgroup=="SPED", ], alpha = .75) +
   geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1) +
-  annotation_custom(note3, xmin = -3.25, xmax = -3.25, ymin = 2.5, ymax = 2.5) + 
+  annotation_custom(note3, xmin = -3, xmax = -3, ymin = 2.5, ymax = 2.5) + 
   geom_point(x=0, y=0, color = "white") +
   
   geom_point(data = train[train$subgroup=="Both", ], alpha = .75) + 
   geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1) +
-  annotation_custom(note4, xmin = -3.25, xmax = -3.253, ymin = 2.5, ymax = 2.5) + 
+  annotation_custom(note4, xmin = -3, xmax = -3, ymin = 2.5, ymax = 2.5) + 
   geom_point(x=0, y=0, color = "white") +
   
   scale_colour_manual(breaks = c("None", "ELL", "SPED", "Both"), values = mycolors) + 
@@ -155,7 +179,7 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   
   mytheme +
   
-  transition_layers(layer_length = 5, transition_length = 1,
+  transition_layers(layer_length = 2, transition_length = .5,
                     # from_blank = TRUE, keep_layers = c(rep(c(2, 1, 1, 1), 4))) +
                     from_blank = TRUE, keep_layers = c(rep(c(3, 2, 1, 1), 4))) +
 
@@ -166,16 +190,6 @@ animate(reg_bysub, fps = 5)
 anim_save(filename="intercept_shift.gif")
 
 # Tina, Tom and Jordan ---------------------------------------------------------
-
-# Import images
-jordanPNG <- readPNG("studentjordan_64bit.png")
-tomPNG <- readPNG("studenttom_64bit.png")
-tinaPNG <- readPNG("studenttina_64bit.png")
-
-# Image Grobs
-jordanGrob <- rasterGrob(jordanPNG, interpolate = TRUE)
-tomGrob <- rasterGrob(tomPNG, interpolate = TRUE)
-tinaGrob <- rasterGrob(tinaPNG, interpolate = TRUE)
 
 # Annotation Grobs
 yhat_jordan_grob <- textGrob(paste(yhat_jordan), 
@@ -239,10 +253,106 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   theme(axis.text.y = element_blank(),
         axis.line = element_line(color = "grey77")) + 
   
-  transition_layers(layer_length = 5, transition_length = 1, from_blank = FALSE) + 
+  transition_layers(layer_length = 1.5, transition_length = 1, from_blank = FALSE) + 
   
   enter_fade()+
   exit_fade()
 
-animate(tina_tom_jordan, fps = 1)
+animate(tina_tom_jordan)
 anim_save(filename="tina_tom_jordan.gif")
+
+# Peer grouping ----------------------------------------------------------------
+
+# Name tags
+iam_tina_grob <- textGrob("Tina", gp = gpar(fontsize = 11, fontface = "bold", col = orange))
+tina_peer_grob <- textGrob(paste0("Tina's \nPeer Group"), gp = gpar(fontsize = 11, fontface = "bold", col = "black"), just = c("right", "center"))
+iam_jill_grob <- textGrob("Jill", gp = gpar(fontsize = 11, fontface = "bold", col = green))
+jill_peer_grob <- textGrob(paste0("Jill's \nPeer Group"), gp = gpar(fontsize = 11, fontface = "bold", col = "black"), just = c("right", "center"))
+
+peergroup <- 
+ggplot(data=train, aes(x = 0, y = 0)) +
+  geom_point(color = "white", fill = "white") +
+  
+  # I am Tina
+  annotation_custom(iam_tina_grob, xmin = -6, xmax = 6, ymin = 41, ymax = 41) + 
+  
+  # Tina
+  annotation_custom(tinaGrob, xmin = -6, xmax = 6, ymin = 32.5, ymax = 42.5) +
+  
+  # Arrow
+  annotate("segment", x = 0, xend = 0, y = 35, yend = 28, color = orange, 
+           size = 1,  arrow=arrow(length=unit(0.25,"cm"))) + 
+  
+  # Tina's peers
+  annotation_custom(peerboyGrob, xmin = -95, xmax = -85, ymin = 20, ymax = 30) +
+  annotation_custom(peergirlGrob, xmin = -80, xmax = -70, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = -65, xmax = -55, ymin = 20, ymax = 30) +
+  annotation_custom(jillGrob, xmin = -50, xmax = -40, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = -35, xmax = -25, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = -20, xmax = -10, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = -5, xmax = 5, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = 10, xmax = 20, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = 25, xmax = 35, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = 40, xmax = 50, ymin = 20, ymax = 30) +
+  
+  # Group
+  annotate("rect", xmin = -97, xmax = 52, ymin = 20, ymax = 30, alpha = 0, color = orange, fill = "white", linetype = "dashed") +
+  annotation_custom(tina_peer_grob, xmin = -98, xmax = -98, ymin = 25, ymax = 25) + 
+  
+  # Pause
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+
+  # I am Jill
+  annotation_custom(iam_jill_grob, xmin = -50, xmax = -40, ymin = 28.5, ymax = 28.5) + 
+  
+  # Arrow
+  annotate("segment", x = -45, xend = -45, y = 22, yend = 13, color = green, 
+           size = 1,  arrow=arrow(length=unit(0.25,"cm"))) + 
+  
+  # Jill's peers
+  annotation_custom(peerboyGrob, xmin = -125, xmax = -115, ymin = 5, ymax = 15) +
+  annotation_custom(peergirlGrob, xmin = -110, xmax = -100, ymin = 5, ymax = 15) +
+  annotation_custom(peerboyGrob, xmin = -95, xmax = -85, ymin = 5, ymax = 15) +
+  annotation_custom(peergirlGrob, xmin = -80, xmax = -70, ymin = 5, ymax = 15) +
+  annotation_custom(peerboyGrob, xmin = -65, xmax = -55, ymin = 5, ymax = 15) +
+  annotation_custom(peergirlGrob, xmin = -50, xmax = -40, ymin = 5, ymax = 15) +
+  annotation_custom(peerboyGrob, xmin = -35, xmax = -25, ymin = 5, ymax = 15) + 
+  annotation_custom(peergirlGrob, xmin = -20, xmax = -10, ymin = 5, ymax = 15) +
+  annotation_custom(peerboyGrob, xmin = -5, xmax = 5, ymin = 5, ymax = 15) + 
+  annotation_custom(peergirlGrob, xmin = 10, xmax = 20, ymin = 5, ymax = 15) + 
+  
+  # Group
+  annotate("rect", xmin = -127, xmax = 22, ymin = 5, ymax = 15, alpha = 0, color = green, fill = "white", linetype = "dashed") + 
+  annotation_custom(jill_peer_grob, xmin = -128, xmax = -128, ymin = 10, ymax = 10) + 
+  
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  
+  lims(x = c(-155, 55),
+       y = c(-10, 50)) + 
+  
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        plot.background=element_blank()) + 
+  
+  transition_layers(layer_length = 1.5, transition_length = 1, from_blank = FALSE) + 
+  
+  enter_fade()+
+  exit_fade()
+  
+animate(peergroup, fps = c(10, 1))
+anim_save(filename="peergroup.gif")
+

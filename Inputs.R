@@ -27,7 +27,7 @@ mycolors <- c( "None" = None, "ELL" = ELL, "SPED" = SPED, "Both" = Both)
 
 yellow <- "#ffc000"
 orange <- "#ed7d31"
-green <- "#702d47"
+green <- "#70ad47"
 darkblue <- "#4472c4"
 lightblue <- "#5b9bd5"
 
