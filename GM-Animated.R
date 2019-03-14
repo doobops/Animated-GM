@@ -8,6 +8,10 @@ inputscript <-
 
 eval(parse(text = inputscript))
 
+# Connect to Repo
+current_path <- gsub(x = paste0(getSourceEditorContext()$path), pattern = "/GM-Animated.R", "")
+setwd(file.path(current_path))
+
 # Explain regression -----------------------------------------------------------
 
 # Grobs for yhat annotations  
@@ -162,6 +166,11 @@ animate(reg_bysub, fps = 5)
 anim_save(filename="intercept_shift.gif")
 
 # Tina, Tom and Jordan ---------------------------------------------------------
+
+# Import images
+jordanPNG <- readPNG("studentjordan_64bit.png")
+tomPNG <- readPNG("studenttom_64bit.png")
+tinaPNG <- readPNG("studenttina_64bit.png")
 
 # Image Grobs
 jordanGrob <- rasterGrob(jordanPNG, interpolate = TRUE)
