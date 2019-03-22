@@ -261,7 +261,7 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
 animate(tina_tom_jordan)
 anim_save(filename="tina_tom_jordan.gif")
 
-# Peer grouping ----------------------------------------------------------------
+# Peer group flow chart ----------------------------------------------------------------
 
 # Name tags
 iam_tina_grob <- textGrob("Tina", gp = gpar(fontsize = 11, fontface = "bold", col = orange))
@@ -356,3 +356,28 @@ ggplot(data=train, aes(x = 0, y = 0)) +
 animate(peergroup, fps = c(10, 1))
 anim_save(filename="peergroup.gif")
 
+
+# Peer grouping ----------------------------------------------------------------
+
+peering <- data.frame(y = c(seq(from = 0, to = 10, by = .2), seq(from = 2, to = 12, by = .2)),
+                      x = c(rep(-.25, 51), rep(.25, 51)),
+                      t0 = c(seq(from = 25, to = 0, by = -1), seq(from = 1, to = 25, by = 1), seq(from = 50, to = 25, by = -1), seq(from = 26, to = 50, by = 1)),
+                      t1 = rep(101, 51))
+
+ggplot(data = peering, aes(x = x, y = y)) +
+  geom_point(
+    data = peering,
+    size = ifelse(peering$y == 5 & peering$x == -.25 | peering$y == 6 & peering$x == .25, 5, 3),
+    alpha = ifelse(peering$y == 5, 1, .75),
+    aes(x = x, y = y, colour = t0)
+  ) +
+  
+  scale_color_gradient(high = "#4472c4", low = "#5b9bd5") + 
+
+  lims(x = c(-.5, .5)) +
+
+  transition_events(start = t0,
+                    end = t1,
+                    enter_length = 1,
+                    exit_length = 1)+
+  enter_grow() 
