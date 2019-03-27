@@ -14,7 +14,7 @@ packages <- c("devtools", "Rcpp", "ggplot2", "gganimate", "gapminder", "dplyr",
               "installr", "animation", "tweenr", "ggforce", "plotly", "tidyr", 
               "MASS", "bindata", "gifski", "png", "transformr", "grid", "magick",
               "gridExtra", "knitr", "shiny", "RCurl", "magrittr", "png", "readPNG",
-              "rstudioapi")
+              "rstudioapi", "ggimage")
 lapply(packages, require, character.only = TRUE)
 
 # Assign colors for graphing subgroups -----------------------------------------
@@ -79,8 +79,8 @@ cor(train[, sapply(train, is.numeric)],
   test <- data.frame(id = c(1001:1004), 
                      pretest = c(pre, jordanpre, tompre, tinapre), 
                      subgroup = c("None", "SPED", "ELL", "None"), 
-                     ELL = c(0, 1, 0, 0), 
-                     SPED = c(0, 0, 1, 0))
+                     ELL = c(0, 0, 1, 0), 
+                     SPED = c(0, 1, 0, 0))
   
   test$yhat <- round(predict(mod, newdata = test), digits = 2)
   
