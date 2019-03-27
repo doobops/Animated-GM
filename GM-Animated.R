@@ -533,10 +533,7 @@ peergroup <-
   geom_point(x=0, y=0, color = "white") +
   geom_point(x=0, y=0, color = "white") +
   geom_point(x=0, y=0, color = "white") +
-  geom_point(x=0, y=0, color = "white") +
-  geom_point(x=0, y=0, color = "white") +
-  geom_point(x=0, y=0, color = "white") +
-  
+
   lims(x = c(-110, 50),
        y = c(-10, 50)) + 
   
@@ -553,9 +550,9 @@ peergroup <-
         panel.grid.minor=element_blank(),
         plot.background=element_blank()) + 
   
-  transition_layers(layer_length = 1, transition_length = 1, from_blank = FALSE) + 
+  transition_layers(layer_length = 1, transition_length = 1, from_blank = TRUE) + 
   
   enter_appear()
 
 animate(peergroup, fps = 3.5) 
-anim_save(filename="peergroup.gif")
+anim_save(filename="sgp_ii.gif")
