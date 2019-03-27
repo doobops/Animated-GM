@@ -24,6 +24,9 @@
   jillPNG <- readPNG("studentjill_64bit.png")
   
   peerexample_PNG <- readPNG("peer_example_64bit.png")
+ 
+  bracketPNG <- readPNG("Bracket.png")
+  bracket2PNG <- readPNG("Bracket2.png")
   
 # Create Grobs
   jordanGrob <- rasterGrob(jordanPNG, interpolate = TRUE)
@@ -35,6 +38,8 @@
   
   peerexampleGrob <- rasterGrob(peerexample_PNG, interpolate = TRUE) 
 
+  bracketGrob <- rasterGrob(bracketPNG, interpolate = TRUE)
+  bracket2Grob <- rasterGrob(bracket2PNG, interpolate = TRUE)
 
 # Explain regression -----------------------------------------------------------
 
@@ -215,15 +220,15 @@ ggplot(train, aes(x = pretest, y = posttest, color = subgroup)) +
   geom_abline(intercept = yint.sped, slope = beta, color = SPED, size = 1) +
   geom_abline(intercept = yint.both, slope = beta, color = Both, size = 1) +
   
-  annotation_custom(jordanGrob, xmin = 1.625, xmax = 2.375, ymin = -4, ymax = -3.25) +
-  annotation_custom(tomGrob, xmin = -1.625, xmax = -2.375, ymin = -4, ymax = -3.25) +
-  annotation_custom(tinaGrob, xmin = 0.375, xmax = -0.375, ymin = -4, ymax = -3.25) +
+  annotation_custom(jordanGrob, xmin = -1.625, xmax = -2.375, ymin = -4, ymax = -3.25) +
+  annotation_custom(tomGrob, xmin = 0.375, xmax = -0.375, ymin = -4, ymax = -3.25) +
+  annotation_custom(tinaGrob, xmin = 1.625, xmax = 2.375, ymin = -4, ymax = -3.25) +
   
   annotate("segment", x = jordanpre, xend = jordanpre, y = -3.25 , yend = yhat_jordan, color = SPED, 
            size = 1, linetype = 2) + 
   annotate("segment", x = jordanpre, xend = -3, y = yhat_jordan, yend = yhat_jordan, color = SPED, 
            size = 1, linetype = 2, arrow=arrow(length=unit(0.4,"cm"))) +
-  annotation_custom(yhat_jordan_grob, xmin = -3.25, xmax = -3.25, ymin = yhat_jordan, ymax = yhat_jordan+.3) +
+  annotation_custom(yhat_jordan_grob, xmin = -3.25, xmax = -3.25, ymin = yhat_jordan, ymax = yhat_jordan +.3) +
   
   annotate("segment", x = tompre, xend = tompre, y = -3.25 , yend = yhat_tom, color = ELL, 
            size = 1, linetype = 2) + 
@@ -331,7 +336,15 @@ ggplot(data=train, aes(x = 0, y = 0)) +
   geom_point(x=0, y=0, color = "white") +
   geom_point(x=0, y=0, color = "white") +
   geom_point(x=0, y=0, color = "white") +
-  
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+
   lims(x = c(-155, 55),
        y = c(-10, 50)) + 
   
@@ -348,36 +361,201 @@ ggplot(data=train, aes(x = 0, y = 0)) +
         panel.grid.minor=element_blank(),
         plot.background=element_blank()) + 
   
-  transition_layers(layer_length = 1.5, transition_length = 1, from_blank = FALSE) + 
+  transition_layers(layer_length = 1, transition_length = 1, from_blank = FALSE) + 
   
   enter_fade()+
   exit_fade()
   
-animate(peergroup, fps = c(10, 1))
+animate(peergroup, fps = 3.5) 
 anim_save(filename="peergroup.gif")
 
 
-# Peer grouping ----------------------------------------------------------------
+# Create Peer Group ------------------------------------------------------------
 
-peering <- data.frame(y = c(seq(from = 0, to = 10, by = .2), seq(from = 2, to = 12, by = .2)),
-                      x = c(rep(-.25, 51), rep(.25, 51)),
-                      t0 = c(seq(from = 25, to = 0, by = -1), seq(from = 1, to = 25, by = 1), seq(from = 50, to = 25, by = -1), seq(from = 26, to = 50, by = 1)),
-                      t1 = rep(101, 51))
+# Data frame
+make.peers <- data.frame(a = seq(from = -2, to = 18, by = .5), 
+                         b = seq(from = 0, to = 20, by = .5),
+                         c = seq(from = 2, to = 22, by = .5))
 
-ggplot(data = peering, aes(x = x, y = y)) +
-  geom_point(
-    data = peering,
-    size = ifelse(peering$y == 5 & peering$x == -.25 | peering$y == 6 & peering$x == .25, 5, 3),
-    alpha = ifelse(peering$y == 5, 1, .75),
-    aes(x = x, y = y, colour = t0)
-  ) +
+# Grobs for annotations
+grobexp <- textGrob("Expected \nEnd of Year Score", gp = gpar(fontsize = 11, fontface = "bold"))
+
+grob50above <- textGrob("50 Students \nAbove", gp = gpar(fontsize = 10, fontface = "bold"), just = c("left", "center"))
+grob50below <- textGrob("50 Students \nBelow", gp = gpar(fontsize = 10, fontface = "bold"), just = c("left", "center"))
+
+grob90 <- textGrob("90", gp = gpar(fontsize = 10))
+grob88.8 <- textGrob("88.8", gp = gpar(fontsize = 10))
+grob90.2 <- textGrob("90.2", gp = gpar(fontsize = 10))
+
+grobTinasPeers <- textGrob("Tina's peer group, \ncentered around \n90", 
+                           gp = gpar(fontsize = 10,
+                                     fontface = "bold",
+                                     just = c("right", "center")))
+
+# Plot
+peerTina <- 
+ggplot(data = make.peers, aes(x = 0, y = 0)) + 
+
+  # Set up background
+  geom_vline(xintercept = 0, color = "#a5a5a5") + 
+  annotation_custom(grobexp, xmin = 0, xmax = 0, ymin = 24, ymax = 24) + 
   
-  scale_color_gradient(high = "#4472c4", low = "#5b9bd5") + 
+  # Set up Tina
+  annotation_custom(tinaGrob, xmin = -2.25, xmax = 0, ymin = 10.5, ymax = 12.75) + 
+  geom_point(data = make.peers[20, ], aes(x = 0, y = c), size = 5, color = None) +
+  annotation_custom(grobTinasPeers, xmin = -5, xmax = -2.25, ymin = 10.5, ymax = 12.75) + 
 
-  lims(x = c(-.5, .5)) +
+  # Set up surrounding peers
+  geom_point(data = make.peers[c(0:19), ], aes(x = 0, y = c), size = 4, alpha = .5, colour = None) +
+  geom_point(data = make.peers[c(20:41), ], aes(x = 0, y = c), size = 4, alpha = .5, colour = None) +
+  annotation_custom(grob90.2, xmin = 0, xmax = 2, ymin = 22, ymax = 22) + 
+  annotation_custom(grob88.8, xmin = 0, xmax = 2, ymin = 2, ymax = 2) + 
+  
+  # Explain
+  annotation_custom(bracketGrob, xmin = 1, xmax = 1.5, ymin = 11, ymax = 23) + 
+  annotation_custom(grob50above, xmin = 2, xmax = 2, ymin = 11, ymax = 23) + 
+  annotation_custom(bracketGrob, xmin = 1, xmax = 1.5, ymin = 2, ymax = 10) + 
+  annotation_custom(grob50below, xmin = 2, xmax = 2, ymin = 10, ymax = 2) + 
 
-  transition_events(start = t0,
-                    end = t1,
-                    enter_length = 1,
-                    exit_length = 1)+
-  enter_grow() 
+  # Pause
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  
+  lims(x = c(-7, 7), 
+       y = c(-3, 25)) +
+  
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        plot.background=element_blank()) + 
+  
+  transition_layers(transition_length = 1,
+                    layer_length = 1.1)
+
+animate(peerTina)
+
+anim_save(filename="peerTina.gif")  
+
+
+  
+  
+
+# SGP I ------------------------------------------------------------------------
+
+peering <- data.frame(x = rep(c(-.5, .5), each = 11),
+                
+                y = c(seq(from = 0, to = 10, by = 1), 
+                      sample(c(-1, 0, 1, 2, 3, 5, 7, 8, 9, 10, 11), size=11)))
+
+peering$image <- ifelse(peering$x == -.5 & peering$y == 5 | peering$x == .5 & peering$y == 7, 
+                        "studenttina_64bit.png",
+                        "peer_boy_64bit.png")
+
+sgp <- 
+ggplot(peering, aes(x, y)) +
+  geom_image(aes(image=image), size=.065) + 
+  lims(y = c(-2, 15)) +
+  
+  scale_x_continuous(limits = c(-1, 1), 
+                     breaks = c(-.5, .5), 
+                     labels = c(paste0("Expected \nEnd of Year Score"), paste0("Actual \nEnd of Year Score"))) +
+  
+  labs(y = "Score",
+       x = " ",
+       col = "Student") + 
+  
+  transition_states(x, wrap=FALSE) +
+  
+  theme(legend.position = "none") + 
+  
+  mytheme + 
+  
+  theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x = element_text(size = 12))
+
+animate(sgp)
+anim_save(filename="sgp_i.gif")
+
+# SGP II------------------------------------------------------------------------
+
+
+# Name tags
+iam_tina_grob <- textGrob("Tina", gp = gpar(fontsize = 11, fontface = "bold", col = orange))
+GrobOutperform1 <- textGrob(paste0("Tina outperformed 70 out of 100 students in her peer group. \nTherefore, her Student Growth Percentile is 70 !"), 
+                           gp = gpar(fontsize = 10, fontface = "bold", col = orange))
+
+
+peergroup <- 
+  ggplot(data=train, aes(x = 0, y = 0)) +
+  geom_point(color = "white", fill = "white") +
+
+  # Tina's peers
+  annotation_custom(peerboyGrob, xmin = -95, xmax = -85, ymin = 20, ymax = 30) +
+  annotation_custom(peergirlGrob, xmin = -80, xmax = -70, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = -65, xmax = -55, ymin = 20, ymax = 30) +
+  annotation_custom(peergirlGrob, xmin = -50, xmax = -40, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = -35, xmax = -25, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = -20, xmax = -10, ymin = 20, ymax = 30) +
+  annotation_custom(tinaGrob, xmin = -5, xmax = 5, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = 10, xmax = 20, ymin = 20, ymax = 30) +
+  annotation_custom(peerboyGrob, xmin = 25, xmax = 35, ymin = 20, ymax = 30) + 
+  annotation_custom(peergirlGrob, xmin = 40, xmax = 50, ymin = 20, ymax = 30) +
+
+  # I am Tina
+  annotation_custom(iam_tina_grob, xmin = -6, xmax = 6, ymin = 31, ymax = 31) + 
+  
+  # Outperformed
+  annotation_custom(bracket2Grob, xmin = -100, xmax = -10, ymin = 15, ymax = 22) + 
+  
+  annotation_custom(GrobOutperform, xmin = -80, xmax = -20, ymin = 10, ymax = 17) + 
+  
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  geom_point(x=0, y=0, color = "white") +
+  
+  lims(x = c(-110, 50),
+       y = c(-10, 50)) + 
+  
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        plot.background=element_blank()) + 
+  
+  transition_layers(layer_length = 1, transition_length = 1, from_blank = FALSE) + 
+  
+  enter_appear()
+
+animate(peergroup, fps = 3.5) 
+anim_save(filename="peergroup.gif")
